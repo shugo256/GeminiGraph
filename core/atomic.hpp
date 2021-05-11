@@ -42,12 +42,24 @@ inline bool write_min(T * ptr, T val) {
 }
 
 template <class T>
-inline void write_add(T * ptr, T val) {
+inline T write_add(T * ptr, T val) {
   volatile T new_val, old_val;
   do {
     old_val = *ptr;
     new_val = old_val + val;
   } while (!cas(ptr, old_val, new_val));
+  return new_val;
+}
+
+// for unsigned types
+template <class T>
+inline T write_sub(T * ptr, T val) {
+  volatile T new_val, old_val;
+  do {
+    old_val = *ptr;
+    new_val = old_val - val;
+  } while (!cas(ptr, old_val, new_val));
+  return new_val;
 }
 
 #endif
