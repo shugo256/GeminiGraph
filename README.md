@@ -47,6 +47,7 @@ srun -N 8 ./toolkits/pagerank /path/to/twitter-2010.binedgelist 41652230 20
 ```
 
 ## Modification from Gemini
+See [1ab23bd](https://github.com/shugo256/GeminiGraph/commit/1ab23bd993302eaa1ddc8faf507302d7fe73b566)
 * *README.md*: added hypergraph extension info
 * *Makefile*: added hypergraph apps to the mix
 * *.gitignore*: ignore executables inside `toolkits/`
