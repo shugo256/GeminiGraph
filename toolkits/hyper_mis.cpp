@@ -260,7 +260,7 @@ void compute(Hypergraph<Empty> * graph) {
 
     // delete vertices
     graph->filter_vertices_from_hyperedges(
-      [&](VertexId vid) { return flags[vid] == 0; },
+      [&](VertexId vid) { return flags[vid] < 2; },
       remaining_v,
       active_h,
       total_degrees
