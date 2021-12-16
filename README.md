@@ -58,6 +58,11 @@ See [1ab23bd](https://github.com/shugo256/GeminiGraph/commit/1ab23bd993302eaa1dd
 
 ## Resources
 
+Shugo Fujimura, Shigeyuki Sato, Kenjiro Taura.
+An Efficient and Scalable Distributed Hypergraph Processing System.
+Journal of Information Processing, 2021, Volume 29, Pages 812-822.
+https://doi.org/10.2197/ipsjjip.29.812
+
 Xiaowei Zhu, Wenguang Chen, Weimin Zheng, and Xiaosong Ma.
 Gemini: A Computation-Centric Distributed Graph Processing System.
 12th USENIX Symposium on Operating Systems Design and Implementation (OSDI '16).
