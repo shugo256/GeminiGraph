@@ -1866,6 +1866,109 @@ public:
     return global_reducer;
   }
 
+  void filter_from(std::function<bool(VertexId)> filter, VertexSubset * remaining_dst, VertexSubset * active_src, VertexId * remaining_out_degree_src=nullptr, VertexId * remaining_in_degree_src=nullptr) {
+    Bitmap * now_deleted_dst = new Bitmap(vertices);
+    now_deleted_dst->clear();
+
+    process_edges<int, Empty>(
+      [&](VertexId src) {
+        emit(src, Empty());
+      },
+      [&](VertexId src, Empty msg, VertexAdjList<Empty> outgoing_adj) {
+        for (AdjUnit<Empty> * ptr=outgoing_adj.begin;ptr!=outgoing_adj.end;ptr++) {
+          VertexId dst = ptr->neighbour;
+          if (!filter(dst) && remaining_dst->get_bit(dst)) {
+            remaining_dst->reset_bit(dst);
+            now_deleted_dst->set_bit(dst);
+          }
+        }
+        return 0;
+      },
+      [&](VertexId dst, VertexAdjList<Empty> incoming_adj) {
+        if (!remaining_dst->get_bit(dst)) return;
+        for (AdjUnit<Empty> * ptr=incoming_adj.begin;ptr!=incoming_adj.end;ptr++) {
+          VertexId src = ptr->neighbour;
+          if (active_src->get_bit(src)) {
+            emit(dst, Empty());
+            return;
+          }
+        }
+      },
+      [&](VertexId dst, Empty msg) {
+        if (!filter(dst)) {
+          remaining_dst->reset_bit(dst);
+          now_deleted_dst->set_bit(dst);
+        }
+        return 0;
+      },
+      active_src,
+      remaining_dst
+    );
+
+    // alternative for VertexFilterNgh step2: update remaining degrees
+    if (remaining_out_degree_src != nullptr) {
+      process_edges<int, VertexId>(
+        [&](VertexId src) {
+          emit(src, 1);
+        },
+        [&](VertexId src, VertexId msg, VertexAdjList<Empty> outgoing_adj) {
+          for (AdjUnit<Empty> * ptr=outgoing_adj.begin;ptr!=outgoing_adj.end;ptr++) {
+            VertexId dst = ptr->neighbour;
+            write_sub(&remaining_out_degree_src[dst], msg);
+          }
+          return 0;
+        },
+        [&](VertexId dst, VertexAdjList<Empty> incoming_adj) {
+          VertexId sum = 0;
+          for (AdjUnit<Empty> * ptr=incoming_adj.begin;ptr!=incoming_adj.end;ptr++) {
+            VertexId src = ptr->neighbour;
+            if (now_deleted_dst->get_bit(src))
+              sum++;
+          }
+          if (sum > 0)
+            emit(dst, sum);
+        },
+        [&](VertexId dst, VertexId msg) {
+          write_sub(&remaining_out_degree_src[dst], msg);
+          return 1;
+        },
+        now_deleted_dst
+      );
+    }
+
+    if (remaining_in_degree_src != nullptr) {
+      transpose();
+      process_edges<int, VertexId>(
+        [&](VertexId src) {
+          emit(src, 1);
+        },
+        [&](VertexId src, VertexId msg, VertexAdjList<Empty> outgoing_adj) {
+          for (AdjUnit<Empty> * ptr=outgoing_adj.begin;ptr!=outgoing_adj.end;ptr++) {
+            VertexId dst = ptr->neighbour;
+            write_sub(&remaining_in_degree_src[dst], msg);
+          }
+          return 0;
+        },
+        [&](VertexId dst, VertexAdjList<Empty> incoming_adj) {
+          VertexId sum = 0;
+          for (AdjUnit<Empty> * ptr=incoming_adj.begin;ptr!=incoming_adj.end;ptr++) {
+            VertexId src = ptr->neighbour;
+            if (now_deleted_dst->get_bit(src))
+              sum++;
+          }
+          if (sum > 0)
+            emit(dst, sum);
+        },
+        [&](VertexId dst, VertexId msg) {
+          write_sub(&remaining_in_degree_src[dst], msg);
+          return 1;
+        },
+        now_deleted_dst
+      );
+      transpose();
+    }
+  }
+
 };
 
 #endif

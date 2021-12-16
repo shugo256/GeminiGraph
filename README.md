@@ -53,6 +53,7 @@ See [1ab23bd](https://github.com/shugo256/GeminiGraph/commit/1ab23bd993302eaa1dd
 * *.gitignore*: ignore executables inside `toolkits/`
 * *atomic.h*: changed `write_add` to return the updated value and added `write_sub`
 * *bitmap.h*: added `Bitmap::reset_bit`
+* *graph.hpp*: added `Graph::filter_from`
 
 
 ## Resources
